@@ -94,4 +94,9 @@ export class UserController {
 
     return { message: SUCCESS_MESSAGES.TAKE_ADMIN, id: takeAdminRoleDto.id };
   }
+
+  @MessagePattern(Pattern.GET_USER_BY_ID)
+  async getUserById(getUserDto: { id: string }) {
+    return await this.userService.getUserById(getUserDto.id);
+  }
 }

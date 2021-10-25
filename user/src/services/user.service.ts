@@ -46,4 +46,8 @@ export class UserService {
   async takeAdminRole(id: string): Promise<User> {
     return await this.userRepository.takeAdminRole(id);
   }
+
+  async getUserById(id: string): Promise<User> {
+    return await this.userRepository.getUserById(id);
+  }
 }

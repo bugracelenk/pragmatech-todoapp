@@ -1,18 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { UserChangePasswordDto } from '../dtos/user.changePassword.dto';
-import { UserUpdateDto } from '../dtos/user.update.dto';
-import { User, UserDocument } from '../schemas/user.schema';
-import { UserStatus, UserType } from '../user.enum';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import * as mongoose from "mongoose";
+import * as bcrypt from "bcrypt";
+import * as crypto from "crypto";
+import { UserChangePasswordDto } from "../dtos/user.changePassword.dto";
+import { UserUpdateDto } from "../dtos/user.update.dto";
+import { User, UserDocument } from "../schemas/user.schema";
+import { UserStatus, UserType } from "../user.enum";
 
 @Injectable()
 export class UserRepository {
-  constructor(
-    @InjectModel(User.name) private userModel: mongoose.Model<UserDocument>,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: mongoose.Model<UserDocument>) {}
 
   async updateUserById(id: string, updateArgs: UserUpdateDto): Promise<User> {
     const objId = new mongoose.Types.ObjectId(id);
@@ -21,14 +19,11 @@ export class UserRepository {
       {
         $set: { ...updateArgs },
       },
-      { new: true },
+      { new: true }
     );
   }
 
-  async changePasswordRequest(
-    email: string,
-    resetPasswordToken: string,
-  ): Promise<User> {
+  async changePasswordRequest(email: string, resetPasswordToken: string): Promise<User> {
     return await this.userModel.findOneAndUpdate(
       { email },
       {
@@ -36,13 +31,11 @@ export class UserRepository {
           resetPasswordToken,
           rptExpires: new Date(Date.now() + 86400000),
         },
-      },
+      }
     );
   }
 
-  async changeUserPassword(
-    changePasswordArgs: UserChangePasswordDto,
-  ): Promise<User> {
+  async changeUserPassword(changePasswordArgs: UserChangePasswordDto): Promise<User> {
     return await this.userModel.findOneAndUpdate(
       {
         email: changePasswordArgs.email,
@@ -52,11 +45,11 @@ export class UserRepository {
       {
         $set: {
           password: changePasswordArgs.password,
-          resetPasswordToken: '',
+          resetPasswordToken: "",
           rptExpires: new Date(Date.now()),
         },
       },
-      { new: true },
+      { new: true }
     );
   }
 
@@ -67,7 +60,7 @@ export class UserRepository {
       {
         $set: { banReason, userStatus: UserStatus.BANNED },
       },
-      { new: true },
+      { new: true }
     );
   }
 
@@ -78,7 +71,7 @@ export class UserRepository {
       {
         $set: { userType: UserType.ADMIN },
       },
-      { new: true },
+      { new: true }
     );
   }
 
@@ -89,7 +82,12 @@ export class UserRepository {
       {
         $set: { userType: UserType.USER },
       },
-      { new: true },
+      { new: true }
     );
+  }
+
+  async getUserById(id: string): Promise<User> {
+    const objId = new mongoose.Types.ObjectId(id);
+    return await this.userModel.findById(id).select("-__v -password -rptExpires -resetPasswordToken");
   }
 }
