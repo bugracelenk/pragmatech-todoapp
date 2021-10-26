@@ -19,7 +19,7 @@ import { Team } from 'src/interfaces/team.interface';
  * updatedAt: Date;
  */
 
-export type TodoDocument = Todo & Document;
+export type TodoDocument = Todo & mongoose.Document;
 
 @Schema({ timestamps: true })
 export class Todo {
