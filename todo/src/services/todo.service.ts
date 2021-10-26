@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TodoCreateDto } from 'src/dto/todo.create.dto';
 import { TodoGetTodosByTeamDto } from 'src/dto/todo.get-by-team.dto';
+import { TodoGetByUserDto } from 'src/dto/todo.get-by-user.dto';
 import { TodoSearchDto } from 'src/dto/todo.search.dto';
 import { TodoUpdateDto } from 'src/dto/todo.update.dto';
 import { TodoRepository } from '../repositories/todo.repository';
@@ -16,6 +17,11 @@ export class TodoService {
 
   async getTodoById(id: string): Promise<Todo> {
     return await this.todoRepository.getTodoById(id);
+  }
+
+  async getTodosByUser(getByUserArgs: TodoGetByUserDto): Promise<Todo[]> {
+    const { userId, perPage, page } = getByUserArgs;
+    return await this.todoRepository.getTodosByUser(userId, perPage, page);
   }
 
   async getTodosByTeam(getByTeamArgs: TodoGetTodosByTeamDto): Promise<Todo[]> {

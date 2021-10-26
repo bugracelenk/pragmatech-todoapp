@@ -8,6 +8,7 @@ import {
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { TodoCreateDto } from 'src/dto/todo.create.dto';
 import { TodoGetTodosByTeamDto } from 'src/dto/todo.get-by-team.dto';
+import { TodoGetByUserDto } from 'src/dto/todo.get-by-user.dto';
 import { TodoSearchDto } from 'src/dto/todo.search.dto';
 import { TodoUpdateDto } from 'src/dto/todo.update.dto';
 import { TodoResponse } from 'src/interfaces/todo.response';
@@ -61,6 +62,24 @@ export class TodoController {
 
     return {
       data: { ...todo },
+      status: HttpStatus.ACCEPTED,
+    };
+  }
+
+  @MessagePattern(Pattern.GET_TODOS_BY_USER)
+  async getTodosByUser(args: TodoGetByUserDto): Promise<TodoResponse> {
+    const todos = await this.todoService.getTodosByUser(args);
+
+    if (!todos) {
+      return {
+        error: ERROR_MESSAGES.TODO_NOT_FOUND,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        data: null,
+      };
+    }
+
+    return {
+      data: { ...todos },
       status: HttpStatus.ACCEPTED,
     };
   }

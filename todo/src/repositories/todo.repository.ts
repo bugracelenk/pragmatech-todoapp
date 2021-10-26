@@ -32,6 +32,28 @@ export class TodoRepository {
       );
   }
 
+  async getTodosByUser(
+    userId: string,
+    perPage: string,
+    page: string,
+  ): Promise<Todo[]> {
+    const { limit, skip } = getLimitSkip(perPage, page);
+    return await this.todoModel
+      .find({ createdBy: userId })
+      .skip(skip)
+      .limit(limit)
+      .populate('assignedTo', 'firstName lastName profileImage username id')
+      .populate('team', '-__v')
+      .populate(
+        'team.teamLeader',
+        'firstName lastName profileImage username id',
+      )
+      .populate(
+        'team.createdBy',
+        'firstName lastName profileImage username id',
+      );
+  }
+
   async getTodosByTeam(
     teamId: string,
     perPage: string,
