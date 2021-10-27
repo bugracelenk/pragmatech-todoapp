@@ -38,6 +38,18 @@ import { TodoController } from './controllers/todo.controller';
           },
         },
       },
+      {
+        name: 'TEAM_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RMQ_HOST],
+          noAck: false,
+          queue: 'team_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
     ]),
   ],
   controllers: [TodoController],

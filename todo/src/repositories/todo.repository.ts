@@ -22,10 +22,7 @@ export class TodoRepository {
       .populate('createdBy', 'firstName lastName profileImage username id')
       .populate('assignedTo', 'firstName lastName profileImage username id')
       .populate('team', '-__v')
-      .populate(
-        'team.teamLeader',
-        'firstName lastName profileImage username id',
-      )
+      .populate('team.leader', 'firstName lastName profileImage username id')
       .populate(
         'team.createdBy',
         'firstName lastName profileImage username id',
@@ -44,10 +41,7 @@ export class TodoRepository {
       .limit(limit)
       .populate('assignedTo', 'firstName lastName profileImage username id')
       .populate('team', '-__v')
-      .populate(
-        'team.teamLeader',
-        'firstName lastName profileImage username id',
-      )
+      .populate('team.leader', 'firstName lastName profileImage username id')
       .populate(
         'team.createdBy',
         'firstName lastName profileImage username id',
@@ -83,10 +77,7 @@ export class TodoRepository {
       .populate('createdBy', 'firstName lastName profileImage username id')
       .populate('assignedTo', 'firstName lastName profileImage username id')
       .populate('team', '-__v')
-      .populate(
-        'team.teamLeader',
-        'firstName lastName profileImage username id',
-      )
+      .populate('team.leader', 'firstName lastName profileImage username id')
       .populate(
         'team.createdBy',
         'firstName lastName profileImage username id',
