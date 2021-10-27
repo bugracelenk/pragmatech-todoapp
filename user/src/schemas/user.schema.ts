@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { UserStatus, UserType } from '../user.enum';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import * as mongoose from "mongoose";
+import { UserStatus, UserType } from "../user.enum";
 
 /**
  * User Model:
@@ -21,9 +21,9 @@ import { UserStatus, UserType } from '../user.enum';
  * updatedAt: Date
  */
 
-export type UserDocument = User & Document;
+export type UserDocument = User & mongoose.Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop()
   id: string;
@@ -45,7 +45,7 @@ export class User {
   })
   password: string;
   @Prop({
-    default: '',
+    default: "",
   })
   resetPasswordToken: string;
   @Prop({
@@ -53,17 +53,17 @@ export class User {
   })
   rptExpires: Date;
   @Prop({
-    default: 'USER',
+    default: "USER",
     enum: UserType,
   })
   userType: UserType;
   @Prop({
-    default: 'ACTIVE',
+    default: "ACTIVE",
     enum: UserStatus,
   })
   userStatus: UserStatus;
   @Prop({
-    default: '',
+    default: "",
   })
   banReason: string;
   @Prop({
@@ -77,10 +77,21 @@ export class User {
   })
   lastName: string;
   @Prop({
-    default:
-      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+    default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
   })
   profileImage: string;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Todo",
+    default: [],
+  })
+  todos: [string | mongoose.Schema.Types.ObjectId];
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Team",
+    default: [],
+  })
+  teams: [string | mongoose.Schema.Types.ObjectId];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

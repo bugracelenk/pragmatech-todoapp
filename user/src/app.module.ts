@@ -51,6 +51,30 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
           },
         },
       },
+      {
+        name: "TODO_SERVICE",
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RMQ_HOST],
+          queue: "todo_queue",
+          noAck: false,
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+      {
+        name: "TEAM_SERVICE",
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RMQ_HOST],
+          queue: "team_queue",
+          noAck: false,
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
     ]),
   ],
   controllers: [AuthController, UserController],

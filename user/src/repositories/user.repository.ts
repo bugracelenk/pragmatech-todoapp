@@ -87,7 +87,22 @@ export class UserRepository {
   }
 
   async getUserById(id: string): Promise<User> {
-    const objId = new mongoose.Types.ObjectId(id);
     return await this.userModel.findById(id).select("-__v -password -rptExpires -resetPasswordToken");
+  }
+
+  async addUsersTodo(userId: string, todoId: string): Promise<User> {
+    return await this.userModel.findByIdAndUpdate(userId, { $addToSet: { todos: todoId } });
+  }
+
+  async removeUsersTodo(userId: string, todoId: string): Promise<User> {
+    return await this.userModel.findByIdAndUpdate(userId, { $pull: { todos: todoId } });
+  }
+
+  async addUsersTeam(userId: string, teamId: string): Promise<User> {
+    return await this.userModel.findByIdAndUpdate(userId, { $addToSet: { teams: teamId } });
+  }
+
+  async removeUsersTeam(userId: string, teamId: string): Promise<User> {
+    return await this.userModel.findByIdAndUpdate(userId, { $pull: { teams: teamId } });
   }
 }

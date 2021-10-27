@@ -50,4 +50,20 @@ export class UserService {
   async getUserById(id: string): Promise<User> {
     return await this.userRepository.getUserById(id);
   }
+
+  async addUsersTodo(userId: string, todoId: string): Promise<User> {
+    return await this.userRepository.addUsersTodo(userId, todoId);
+  }
+
+  async removeUsersTodo(userId: string, todoId: string): Promise<User> {
+    return await this.userRepository.removeUsersTodo(userId, todoId);
+  }
+
+  async addUsersTeam(userId: string, teamId: string): Promise<User> {
+    return await this.userRepository.addUsersTeam(userId, teamId);
+  }
+
+  async removeUsersTeam(userId: string, teamId: string): Promise<User> {
+    return await this.userRepository.removeUsersTeam(userId, teamId);
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, InternalServerErrorException, Inject } from "@nestjs/common";
+import { Controller, InternalServerErrorException, Inject, HttpStatus } from "@nestjs/common";
 import { ClientProxy, MessagePattern } from "@nestjs/microservices";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "src/utilities/messages.data";
 import { UserChangePasswordDto } from "../dtos/user.changePassword.dto";
@@ -10,7 +10,9 @@ import { Pattern } from "../pattern.enum";
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    @Inject("MAIL_SERVICE") private readonly mailerServiceClient: ClientProxy
+    @Inject("MAIL_SERVICE") private readonly mailerServiceClient: ClientProxy,
+    @Inject("TODO_SERVICE") private readonly todoServiceClient: ClientProxy,
+    @Inject("TEAM_SERVICE") private readonly teamServiceClient: ClientProxy
   ) {}
 
   @MessagePattern(Pattern.UPDATE)
@@ -98,5 +100,121 @@ export class UserController {
   @MessagePattern(Pattern.GET_USER_BY_ID)
   async getUserById(getUserDto: { id: string }) {
     return await this.userService.getUserById(getUserDto.id);
+  }
+
+  @MessagePattern(Pattern.ADD_USER_TODO)
+  async addUsersTodo(addUsersTodoDto: {
+    userId: string;
+    todoId: string;
+  }): Promise<{ message?: string; status: number; error?: string }> {
+    const { userId, todoId } = addUsersTodoDto;
+
+    const todo = await this.todoServiceClient.send(Pattern.GET_TODO_BY_ID, { todoId });
+    if (!todo) {
+      return {
+        error: "TODO_NOT_FOUND",
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    const updatedUser = await this.userService.addUsersTodo(userId, todoId);
+    if (!updatedUser) {
+      return {
+        error: `INTERNAL_SERVER_ERROR_${Pattern.ADD_USER_TODO}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    return {
+      message: `SUCCESS_${Pattern.ADD_USER_TODO}`,
+      status: HttpStatus.ACCEPTED,
+    };
+  }
+
+  @MessagePattern(Pattern.REMOVE_USER_TODO)
+  async removeUsersTodo(removeUsersTodoDto: {
+    userId: string;
+    todoId: string;
+  }): Promise<{ message?: string; status: number; error?: string }> {
+    const { userId, todoId } = removeUsersTodoDto;
+
+    const todo = await this.todoServiceClient.send(Pattern.GET_TODO_BY_ID, { todoId });
+    if (!todo) {
+      return {
+        error: "TODO_NOT_FOUND",
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    const updatedUser = await this.userService.removeUsersTodo(userId, todoId);
+    if (!updatedUser) {
+      return {
+        error: `INTERNAL_SERVER_ERROR_${Pattern.REMOVE_USER_TODO}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    return {
+      message: `SUCCESS_${Pattern.REMOVE_USER_TODO}`,
+      status: HttpStatus.ACCEPTED,
+    };
+  }
+
+  @MessagePattern(Pattern.ADD_USER_TEAM)
+  async addUsersTeam(addUsersTeamDto: {
+    userId: string;
+    teamId: string;
+  }): Promise<{ message?: string; status: number; error?: string }> {
+    const { userId, teamId } = addUsersTeamDto;
+
+    const team = await this.teamServiceClient.send(Pattern.GET_TODO_BY_ID, { teamId });
+    if (!team) {
+      return {
+        error: "TEAM_NOT_FOUND",
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    const updatedUser = await this.userService.addUsersTeam(userId, teamId);
+    if (!updatedUser) {
+      return {
+        error: `INTERNAL_SERVER_ERROR_${Pattern.ADD_USER_TEAM}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    return {
+      message: `SUCCESS_${Pattern.ADD_USER_TEAM}`,
+      status: HttpStatus.ACCEPTED,
+    };
+  }
+
+  @MessagePattern(Pattern.REMOVE_USER_TEAM)
+  async removeUsersTeam(removeUsersTeamDto: {
+    userId: string;
+    teamId: string;
+  }): Promise<{ message?: string; status: number; error?: string }> {
+    const { userId, teamId } = removeUsersTeamDto;
+
+    const team = await this.teamServiceClient.send(Pattern.GET_TODO_BY_ID, { teamId });
+    if (!team) {
+      return {
+        error: "TEAM_NOT_FOUND",
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    const updatedUser = await this.userService.removeUsersTeam(userId, teamId);
+    if (!updatedUser) {
+      return {
+        error: `INTERNAL_SERVER_ERROR_${Pattern.REMOVE_USER_TEAM}`,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+
+    return {
+      message: `SUCCESS_${Pattern.REMOVE_USER_TEAM}`,
+      status: HttpStatus.ACCEPTED,
+    };
   }
 }
