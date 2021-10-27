@@ -69,7 +69,7 @@ export class Todo {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Team',
   })
-  team: Team | string | mongoose.Schema.Types.ObjectId;
+  team: Team & string & mongoose.Schema.Types.ObjectId;
 
   @Prop({
     default: false,

@@ -124,10 +124,16 @@ export class TodoController {
   async updateTodo(args: TodoUpdateDto): Promise<TodoResponse> {
     const updatedTodo = await this.todoService.updateTodo(args);
 
-    if (!updatedTodo) {
+    if (!updatedTodo || typeof updatedTodo.status === 'number') {
       return {
-        error: ERROR_MESSAGES.TODO_UPDATE_FAILED,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error:
+          updatedTodo.status === HttpStatus.FORBIDDEN
+            ? 'FORBIDDEN'
+            : ERROR_MESSAGES.TODO_UPDATE_FAILED,
+        status:
+          typeof updatedTodo.status === 'number'
+            ? updatedTodo.status
+            : HttpStatus.INTERNAL_SERVER_ERROR,
         data: null,
       };
     }
@@ -139,13 +145,24 @@ export class TodoController {
   }
 
   @MessagePattern(Pattern.DELETE_TODO)
-  async deleteTodo(args: { id: string }): Promise<TodoResponse> {
-    const deletedTodo = await this.todoService.deleteTodo(args.id);
+  async deleteTodo(deleteArgs: {
+    todoId: string;
+    userId: string;
+  }): Promise<TodoResponse> {
+    const { todoId, userId } = deleteArgs;
+    const deletedTodo = await this.todoService.deleteTodo(todoId, userId);
 
-    if (!deletedTodo) {
+    const { status } = deletedTodo;
+    if (!deletedTodo || typeof status === 'number') {
       return {
-        error: ERROR_MESSAGES.TODO_NOT_FOUND,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error:
+          status === HttpStatus.FORBIDDEN
+            ? 'FORBIDDEN'
+            : ERROR_MESSAGES.TODO_NOT_FOUND,
+        status:
+          typeof status === 'number'
+            ? status
+            : HttpStatus.INTERNAL_SERVER_ERROR,
         data: null,
       };
     }

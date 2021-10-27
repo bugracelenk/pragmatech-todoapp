@@ -8,4 +8,8 @@ export type TodoUpdateDto = {
   private?: boolean;
   archived?: boolean;
   id?: string;
+  user: {
+    id: string;
+    role: string;
+  };
 };

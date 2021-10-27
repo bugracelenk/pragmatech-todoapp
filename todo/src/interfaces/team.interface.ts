@@ -5,7 +5,7 @@ export interface Team {
   id: string;
   leader: string;
   createdBy: string;
-  members: [User];
-  todos: [Todo];
+  members: [User | string];
+  todos: [Todo | string];
   teamStatus: string;
 }
