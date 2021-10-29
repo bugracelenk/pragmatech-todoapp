@@ -1,3 +1,4 @@
+import { User } from 'src/interfaces/user.interface';
 import { TodoStatus } from 'src/schemas/todo.enum';
 
 export type TodoUpdateDto = {
@@ -8,8 +9,5 @@ export type TodoUpdateDto = {
   private?: boolean;
   archived?: boolean;
   id?: string;
-  user: {
-    id: string;
-    role: string;
-  };
+  user: User;
 };
