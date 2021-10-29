@@ -24,7 +24,6 @@ export class TodoController {
   ) {}
 
   @MessagePattern(Pattern.CREATE_TODO)
-  @UsePipes(ValidationPipe)
   async createTodo(createArgs: TodoCreateDto): Promise<TodoResponse> {
     //check is user exists
     const user = await this.userServiceClient.send(Pattern.GET_USER_BY_ID, {
@@ -43,7 +42,7 @@ export class TodoController {
     //else create todo and return response
     const createdTodo = await this.todoService.createTodo(createArgs);
     return {
-      data: { ...createdTodo },
+      data: createdTodo,
       status: HttpStatus.ACCEPTED,
     };
   }

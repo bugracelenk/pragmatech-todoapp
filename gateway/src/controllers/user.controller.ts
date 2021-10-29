@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -32,6 +33,7 @@ import {
 import { ActiveStatusGuard } from 'src/guards/active.user.guard';
 import { JwtGuard } from 'src/guards/jwt.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { IUserFromRequest } from 'src/interfaces/user.interface';
 import { Pattern } from 'src/patterns.enum';
 import {
   UserBanUserResponse,
@@ -49,7 +51,8 @@ export class UserController {
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
   ) {}
 
-  @Patch('update')
+  @Patch('update/')
+  @UserStatuses(UserStatus.ACTIVE)
   @UseGuards(JwtGuard, ActiveStatusGuard)
   @ApiBearerAuth('Authorization')
   @ApiOperation({ summary: 'Updating user' })
@@ -58,11 +61,15 @@ export class UserController {
     description: 'Updated user',
     type: UserUpdateResponse,
   })
-  async updateUser(@Body() updateDto: UserUpdateDto) {
+  async updateUser(
+    @Body() updateDto: UserUpdateDto,
+    @Req() request: IUserFromRequest,
+  ) {
+    const { user } = request;
     const updatedUserResponse =
       await this.userServiceClient.send<UserUpdateResponse>(
         Pattern.USER_UPDATE,
-        { ...updateDto },
+        { ...updateDto, id: user.id },
       );
 
     const updatedUserData = await lastValueFrom(updatedUserResponse);

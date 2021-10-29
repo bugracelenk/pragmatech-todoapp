@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { TodoStatus } from './todo.enum';
-import { User } from '../interfaces/user.interface';
 import { Team } from 'src/interfaces/team.interface';
+import { TodoStatus } from './todo.enum';
 
 /**
  * Todo Model:
@@ -41,7 +40,7 @@ export class Todo {
     ref: 'User',
     type: mongoose.Schema.Types.ObjectId,
   })
-  createdBy: User | string | mongoose.Schema.Types.ObjectId;
+  createdBy: string | mongoose.Schema.Types.ObjectId;
 
   @Prop({
     enum: TodoStatus,
@@ -58,7 +57,7 @@ export class Todo {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   })
-  assignedTo: User | string | mongoose.Schema.Types.ObjectId;
+  assignedTo: string | mongoose.Schema.Types.ObjectId;
 
   @Prop({
     default: false,
@@ -69,7 +68,7 @@ export class Todo {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Team',
   })
-  team: Team & string & mongoose.Schema.Types.ObjectId;
+  team: string | mongoose.Schema.Types.ObjectId | Team;
 
   @Prop({
     default: false,

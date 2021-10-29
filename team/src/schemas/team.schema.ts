@@ -31,14 +31,14 @@ export class Team {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'User',
+    ref: 'user',
   })
   leader: IUser | string | mongoose.Schema.Types.ObjectId;
 
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'user',
   })
   createdBy: IUser | string | mongoose.Schema.Types.ObjectId;
 

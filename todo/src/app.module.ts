@@ -5,6 +5,7 @@ import { Todo, TodoSchema } from './schemas/todo.schema';
 import { TodoService } from './services/todo.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TodoController } from './controllers/todo.controller';
+import { TodoRepository } from './repositories/todo.repository';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { TodoController } from './controllers/todo.controller';
     ]),
   ],
   controllers: [TodoController],
-  providers: [TodoService],
+  providers: [TodoService, TodoRepository],
+  exports: [TodoRepository],
 })
 export class AppModule {}

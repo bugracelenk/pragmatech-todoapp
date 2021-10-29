@@ -81,13 +81,13 @@ export class User {
   })
   profileImage: string;
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Todo",
     default: [],
   })
   todos: [string | mongoose.Schema.Types.ObjectId];
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Team",
     default: [],
   })

@@ -106,10 +106,6 @@ export class UserRegisterDto {
 }
 
 export class UserUpdateDto {
-  @IsNotEmpty({ message: Messages.notEmpty('email') })
-  @IsMongoId({ message: Messages.notValid('id', 'ObjectId') })
-  id: string;
-
   profileImage?: string;
   firstName?: string;
   lastName?: string;

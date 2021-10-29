@@ -57,10 +57,14 @@ export class TodoController {
   @UserStatuses(UserStatus.ACTIVE)
   @UseGuards(JwtGuard, ActiveStatusGuard)
   @UsePipes(ValidationPipe)
-  async createTodo(@Body() createTodoDto: TodoCreateDto) {
+  async createTodo(
+    @Body() createTodoDto: TodoCreateDto,
+    @Req() request: IUserFromRequest,
+  ) {
     const createTodoResponse = await this.todoServiceClient.send<TodoResponse>(
       Pattern.TODO_CREATE_TODO,
       {
+        createdBy: request.user.id,
         ...createTodoDto,
       },
     );

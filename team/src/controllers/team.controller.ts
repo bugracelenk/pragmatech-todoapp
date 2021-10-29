@@ -71,11 +71,13 @@ export class TeamController {
 
   @MessagePattern(Patterns.UPDATE_TEAM)
   async updateTeam(data: {
-    id: string;
+    teamId: string;
+    userId: string;
     updateArgs: TeamUpdateDto;
   }): Promise<TeamResponse> {
     const updatedTeam = await this.teamService.updateTeam(
-      data.id,
+      data.teamId,
+      data.userId,
       data.updateArgs,
     );
 
@@ -98,6 +100,7 @@ export class TeamController {
   async addUserToTeam(data: {
     teamId: string;
     userId: string;
+    operatingUserId: string;
   }): Promise<TeamResponse> {
     const user = await this.userServiceClient.send(Patterns.GET_USER_BY_ID, {
       id: data.userId,
@@ -114,6 +117,7 @@ export class TeamController {
     const updatedTeam = await this.teamService.addUserToTeam(
       data.teamId,
       data.userId,
+      data.operatingUserId,
     );
 
     if (!updatedTeam) {
@@ -135,6 +139,7 @@ export class TeamController {
   async removeUserFromTeam(data: {
     teamId: string;
     userId: string;
+    operatingUserId: string;
   }): Promise<TeamResponse> {
     const user = await this.userServiceClient.send(Patterns.GET_USER_BY_ID, {
       id: data.userId,
@@ -151,6 +156,7 @@ export class TeamController {
     const updatedTeam = await this.teamService.removeUserFromTeam(
       data.teamId,
       data.userId,
+      data.operatingUserId,
     );
 
     if (!updatedTeam) {
@@ -172,6 +178,7 @@ export class TeamController {
   async addTodoToTeam(data: {
     teamId: string;
     todoId: string;
+    operatingUserId: string;
   }): Promise<TeamResponse> {
     const todo = await this.todoServiceClient.send(Patterns.GET_TODO_BY_ID, {
       id: data.todoId,
@@ -188,6 +195,7 @@ export class TeamController {
     const updatedTeam = await this.teamService.addTodoToTeam(
       data.teamId,
       data.todoId,
+      data.operatingUserId,
     );
 
     if (!updatedTeam) {
@@ -238,6 +246,7 @@ export class TeamController {
   async addModeratorToTeam(data: {
     teamId: string;
     userId: string;
+    operatingUserId: string;
   }): Promise<TeamResponse> {
     const user = await this.userServiceClient.send(Patterns.GET_USER_BY_ID, {
       id: data.userId,
@@ -254,6 +263,7 @@ export class TeamController {
     const updatedTeam = await this.teamService.grantModeratorRoleToMember(
       data.teamId,
       data.userId,
+      data.operatingUserId,
     );
 
     if (!updatedTeam) {
@@ -275,6 +285,7 @@ export class TeamController {
   async removeModeratorFromTeam(data: {
     teamId: string;
     userId: string;
+    operatingUserId: string;
   }): Promise<TeamResponse> {
     const user = await this.userServiceClient.send(Patterns.GET_USER_BY_ID, {
       id: data.userId,
@@ -291,6 +302,7 @@ export class TeamController {
     const updatedTeam = await this.teamService.removeUserFromTeam(
       data.teamId,
       data.userId,
+      data.operatingUserId,
     );
 
     if (!updatedTeam) {

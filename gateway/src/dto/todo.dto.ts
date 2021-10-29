@@ -25,13 +25,11 @@ export class TodoCreateDto {
   @IsString({ message: Messages.notValid('desc', 'string') })
   desc: string;
 
-  @IsNotEmpty({ message: Messages.notEmpty('createdBy') })
-  @IsMongoId({ message: Messages.notValid('createdBy', 'ObjectId') })
-  createdBy: string;
-
+  @IsOptional()
   @IsEnum(TodoStatus, { message: Messages.notValid('status') })
   status: TodoStatus;
 
+  @IsOptional()
   @IsBoolean({ message: Messages.notValid('assigned') })
   assigned: boolean;
 
@@ -39,6 +37,7 @@ export class TodoCreateDto {
   @IsMongoId({ message: Messages.notValid('assignedTo', 'ObjectId') })
   assignedTo: string;
 
+  @IsOptional()
   @IsBoolean({ message: Messages.notValid('private') })
   private: boolean;
 

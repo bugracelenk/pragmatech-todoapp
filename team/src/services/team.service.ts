@@ -84,10 +84,11 @@ export class TeamService {
   async addUserToTeam(
     teamId: string,
     userId: string,
+    operatingUserId: string,
   ): Promise<Team | { error?: string; status: number }> {
     const permission = await this.checkPermissionForOperation(
       teamId,
-      userId,
+      operatingUserId,
       false,
     );
 
@@ -106,10 +107,11 @@ export class TeamService {
   async removeUserFromTeam(
     teamId: string,
     userId: string,
+    operatingUserId: string,
   ): Promise<Team | { error?: string; status: number }> {
     const permission = await this.checkPermissionForOperation(
       teamId,
-      userId,
+      operatingUserId,
       false,
     );
 
@@ -128,10 +130,11 @@ export class TeamService {
   async grantModeratorRoleToMember(
     teamId: string,
     userId: string,
+    operatingUserId: string,
   ): Promise<Team | { error?: string; status: number }> {
     const permission = await this.checkPermissionForOperation(
       teamId,
-      userId,
+      operatingUserId,
       false,
     );
 
@@ -144,10 +147,11 @@ export class TeamService {
   async takeModeratorRoleFromMember(
     teamId: string,
     userId: string,
+    operatingUserId: string,
   ): Promise<Team | { error?: string; status: number }> {
     const permission = await this.checkPermissionForOperation(
       teamId,
-      userId,
+      operatingUserId,
       false,
     );
 
@@ -177,7 +181,6 @@ export class TeamService {
   async removeTodoFromTeam(
     teamId: string,
     todoId: string,
-    userId: string,
   ): Promise<Team | { error?: string; status: number }> {
     return this.teamRepository.removeTodoFromTeam(teamId, todoId);
   }
