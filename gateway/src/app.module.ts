@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppService } from './app.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -7,6 +6,9 @@ import { JwtGuard } from './guards/jwt.guard';
 import { JwtStrategy } from './guards/jwt.strategy';
 import { AuthController } from './controllers/auth.controller';
 import { UserController } from './controllers/user.controller';
+import { TeamController } from './controllers/team.controller';
+import { TodoController } from './controllers/todo.controller';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -55,7 +57,7 @@ import { UserController } from './controllers/user.controller';
       }),
     }),
   ],
-  controllers: [AuthController, UserController],
-  providers: [AppService, JwtGuard, JwtStrategy],
+  controllers: [AuthController, UserController, TeamController, TodoController],
+  providers: [JwtGuard, JwtStrategy],
 })
 export class AppModule {}

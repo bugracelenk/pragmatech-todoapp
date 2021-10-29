@@ -16,7 +16,12 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { lastValueFrom } from 'rxjs';
 import { UserStatus, UserStatuses } from 'src/decorators/status.decorator';
 import {
@@ -32,6 +37,7 @@ import { IUserFromRequest } from 'src/interfaces/user.interface';
 import { Pattern } from 'src/patterns.enum';
 import { TodoResponse } from 'src/responses/todo.response';
 
+@ApiTags('Todo')
 @Controller('todo')
 export class TodoController {
   constructor(
@@ -39,6 +45,7 @@ export class TodoController {
   ) {}
 
   @Post('create')
+  @ApiBearerAuth('Authorization')
   @ApiOperation({
     summary: 'Creates new todo',
   })
