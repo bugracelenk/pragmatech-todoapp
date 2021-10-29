@@ -6,7 +6,7 @@ import { TeamStatus } from './team.enum';
 
 /**
  * Team Model:
- * teamName: string;
+ * name: string;
  * leader: User | string | mongosoe.Schema.Types.ObjectId,
  * createdBy: User | string | mongosoe.Schema.Types.ObjectId,
  * moderators: [User],
@@ -26,7 +26,7 @@ export class Team {
     minlength: 3,
     maxlength: 20,
   })
-  teamName: string;
+  name: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

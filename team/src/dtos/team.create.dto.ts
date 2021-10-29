@@ -15,7 +15,7 @@ export class TeamCreateDto {
   @IsNotEmpty({ message: 'Team name can not be empty!' })
   @MinLength(3, { message: 'Team name must be at least 3 character long!' })
   @MaxLength(20, { message: 'Team name can be 20 character max!' })
-  teamName: string;
+  name: string;
 
   @IsNotEmpty({ message: 'leader can not be empty' })
   @IsMongoId({ message: 'leader id must be a valid MongoDB ObjectId' })
