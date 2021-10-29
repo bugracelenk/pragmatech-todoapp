@@ -48,7 +48,7 @@ export class TodoService {
     if (createArgs.team) {
       const updatedTeam = await this.teamServiceClient.send<TeamResponse>(
         Pattern.ADD_TEAM_TODO,
-        { todoId: todo.id, teamId: todo.team },
+        { todoId: todo.id, teamId: todo.team, userId: createArgs.createdBy },
       );
       const teamData = await lastValueFrom(updatedTeam);
 
