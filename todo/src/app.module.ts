@@ -6,6 +6,8 @@ import { TodoService } from './services/todo.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TodoController } from './controllers/todo.controller';
 import { TodoRepository } from './repositories/todo.repository';
+import { User, UserSchema } from './schemas/user.schema';
+import { Team, TeamSchema } from './schemas/team.schema';
 
 @Module({
   imports: [
@@ -25,6 +27,34 @@ import { TodoRepository } from './repositories/todo.repository';
           return schema;
         },
       },
+      {
+        name: User.name,
+        useFactory: () => {
+          const schema = UserSchema;
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              throw new Error('this schema is read-only');
+            } else {
+              next();
+            }
+          });
+          return schema;
+        },
+      },
+      {
+        name: Team.name,
+        useFactory: () => {
+          const schema = TeamSchema;
+          schema.pre('save', function (next) {
+            if (this.isNew) {
+              throw new Error('this schema is read-only');
+            } else {
+              next();
+            }
+          });
+          return schema;
+        },
+      },
     ]),
     ClientsModule.register([
       {
@@ -32,8 +62,8 @@ import { TodoRepository } from './repositories/todo.repository';
         transport: Transport.RMQ,
         options: {
           urls: [process.env.RMQ_HOST],
-          noAck: false,
           queue: 'user_queue',
+          noAck: false,
           queueOptions: {
             durable: false,
           },

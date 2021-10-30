@@ -1,9 +1,9 @@
 import { Todo } from '../schemas/todo.schema';
-import { User } from '../interfaces/user.interface';
+import { IUser } from '../interfaces/user.interface';
 
 export function havePermission(permissionArg: {
   todo: Todo;
-  user: Partial<User>;
+  user: Partial<IUser>;
   requiredRole: string;
 }): boolean {
   const { todo, user, requiredRole } = permissionArg;
