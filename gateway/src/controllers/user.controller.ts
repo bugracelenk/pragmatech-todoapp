@@ -40,6 +40,7 @@ import {
   UserChangePasswordResponse,
   UserForgotPasswordResponse,
   UserGrantAdminRoleResponse,
+  UserResponse,
   UserTakeAdminRoleResponse,
   UserUpdateResponse,
 } from 'src/responses/user.response';
@@ -50,6 +51,33 @@ export class UserController {
   constructor(
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
   ) {}
+
+  @Get('/')
+  @UserStatuses(UserStatus.ACTIVE)
+  @UseGuards(JwtGuard, ActiveStatusGuard)
+  @ApiBearerAuth('Authorization')
+  @ApiOperation({ summary: 'Getting users profile' })
+  @ApiResponse({
+    status: HttpStatus.ACCEPTED,
+    description: 'user data without rpt rptExpires and password',
+  })
+  async getUser(@Req() request: IUserFromRequest) {
+    const { user } = request;
+    const getUserResponse = await this.userServiceClient.send<UserResponse>(
+      Pattern.USER_GET_USER,
+      { id: user.id },
+    );
+
+    const userData = await lastValueFrom(getUserResponse);
+    if (userData.error) {
+      throw new InternalServerErrorException(userData.error);
+    }
+
+    return {
+      status: HttpStatus.ACCEPTED,
+      user: userData.user,
+    };
+  }
 
   @Patch('update/')
   @UserStatuses(UserStatus.ACTIVE)

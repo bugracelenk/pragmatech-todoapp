@@ -11,10 +11,7 @@ import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';
 import { UserLoginDto, UserRegisterDto } from 'src/dto/user.dto';
 import { Pattern } from 'src/patterns.enum';
-import {
-  UserLoginResponse,
-  UserRegisterResponse,
-} from 'src/responses/user.response';
+import { AuthResponse } from 'src/responses/user.response';
 import { lastValueFrom } from 'rxjs';
 
 @ApiTags('Auth')
@@ -33,7 +30,7 @@ export class AuthController {
     description: 'Logged in',
   })
   async login(@Body() loginDto: UserLoginDto) {
-    const tokenResponse = await this.userServiceClient.send<UserLoginResponse>(
+    const tokenResponse = await this.userServiceClient.send<AuthResponse>(
       Pattern.USER_LOGIN,
       { ...loginDto },
     );
@@ -55,11 +52,10 @@ export class AuthController {
     description: 'Registered user',
   })
   async register(@Body() registerDto: UserRegisterDto) {
-    const tokenResponse =
-      await this.userServiceClient.send<UserRegisterResponse>(
-        Pattern.USER_REGISTER,
-        { ...registerDto },
-      );
+    const tokenResponse = await this.userServiceClient.send<AuthResponse>(
+      Pattern.USER_REGISTER,
+      { ...registerDto },
+    );
 
     const tokenData = await lastValueFrom(tokenResponse);
 

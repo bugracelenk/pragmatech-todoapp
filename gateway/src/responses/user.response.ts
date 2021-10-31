@@ -23,16 +23,7 @@ class DefaultResponse {
   error?: string;
 }
 
-export class UserLoginResponse extends DefaultResponse {
-  @ApiProperty({
-    example: 'JWT_TOKEN!',
-    description: 'jwt token returned from user microservice for authorization',
-    required: true,
-  })
-  token: string;
-}
-
-export class UserRegisterResponse extends DefaultResponse {
+export class AuthResponse extends DefaultResponse {
   @ApiProperty({
     example: 'JWT_TOKEN!',
     description: 'jwt token returned from user microservice for authorization',
@@ -83,6 +74,13 @@ export class UserGrantAdminRoleResponse extends DefaultResponse {
     required: true,
   })
   id?: string;
+}
+
+export class UserResponse extends DefaultResponse {
+  @ApiProperty({
+    description: 'User data',
+  })
+  user?: any;
 }
 
 export class UserTakeAdminRoleResponse extends UserGrantAdminRoleResponse {}

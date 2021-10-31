@@ -80,7 +80,7 @@ export class TodoController {
     };
   }
 
-  @Get('/')
+  @Get('/:id')
   @ApiOperation({
     summary: 'Gets todo with the given id',
   })
@@ -89,10 +89,8 @@ export class TodoController {
     description: 'Todo retrieved',
     type: TodoResponse,
   })
-  @UserStatuses(UserStatus.ACTIVE)
-  @UseGuards(JwtGuard, ActiveStatusGuard)
   @UsePipes(ValidationPipe)
-  async getTodoWithId(@Query('id') id: string) {
+  async getTodoWithId(@Param('id') id: string) {
     const getTodoResponse = await this.todoServiceClient.send<TodoResponse>(
       Pattern.TODO_GET_TODO_WITH_ID,
       {
