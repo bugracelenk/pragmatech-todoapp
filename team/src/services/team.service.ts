@@ -51,10 +51,15 @@ export class TeamService {
   async createTeam(createArgs: TeamCreateDto): Promise<Team> {
     const team = await this.teamRepository.createTeam(createArgs);
 
-    await this.userServiceClient.send(Patterns.ADD_USER_TEAM, {
-      userId: team.createdBy,
-      teamId: team.id,
-    });
+    const userAddTeamResponse = await this.userServiceClient.send(
+      Patterns.ADD_USER_TEAM,
+      {
+        userId: team.createdBy,
+        teamId: team.id,
+      },
+    );
+
+    const data = await lastValueFrom(userAddTeamResponse);
 
     return team;
   }

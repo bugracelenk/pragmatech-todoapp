@@ -43,21 +43,21 @@ export class Team {
   createdBy: User | string | mongoose.Schema.Types.ObjectId;
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: 'User',
     default: [],
   })
   moderators: [User | string | mongoose.Schema.Types.ObjectId];
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: 'User',
     default: [],
   })
   members: [User | string | mongoose.Schema.Types.ObjectId];
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: 'Todo',
     default: [],
   })
