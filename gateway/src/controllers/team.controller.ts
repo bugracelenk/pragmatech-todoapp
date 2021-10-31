@@ -77,7 +77,7 @@ export class TeamController {
     };
   }
 
-  @Get('/')
+  @Get('/:id')
   @ApiOperation({
     summary: 'Gets team with the given id',
   })
