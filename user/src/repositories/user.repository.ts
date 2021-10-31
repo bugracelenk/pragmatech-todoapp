@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import * as mongoose from "mongoose";
-import * as bcrypt from "bcrypt";
-import * as crypto from "crypto";
 import { UserChangePasswordDto } from "../dtos/user.changePassword.dto";
 import { UserUpdateDto } from "../dtos/user.update.dto";
 import { User, UserDocument } from "../schemas/user.schema";
@@ -87,7 +85,14 @@ export class UserRepository {
   }
 
   async getUserById(id: string): Promise<User> {
-    return await this.userModel.findById(id).select("-__v -password -rptExpires -resetPasswordToken");
+    return await this.userModel
+      .findById(id)
+      .select("-__v -password -rptExpires -resetPasswordToken -_id")
+      .populate({ path: "todos", select: "id title status createdBy" })
+      .populate({ path: "todos.createdBy", select: "profileImage firstName lastName username id" })
+      .populate({ path: "teams", select: "id name leader createdBy teamStatus" })
+      .populate({ path: "teams.leader", select: "profileImage firstName lastName username id" })
+      .populate({ path: "teams.createdBy", select: "profileImage firstName lastName username id" });
   }
 
   async addUsersTodo(userId: string, todoId: string): Promise<User> {

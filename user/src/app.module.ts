@@ -12,6 +12,8 @@ import { UserController } from "./controllers/user.controller";
 import { UserService } from "./services/user.service";
 import { UserRepository } from "./repositories/user.repository";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { Team, TeamSchema } from "./schemas/team.schema";
+import { Todo, TodoSchema } from "./schemas/todo.schema";
 
 @Module({
   imports: [
@@ -26,6 +28,30 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
             if (this.isNew) {
               const objId = this._id;
               this.id = objId;
+            }
+          });
+          return schema;
+        },
+      },
+      {
+        name: Team.name,
+        useFactory: () => {
+          const schema = TeamSchema;
+          schema.pre("save", function () {
+            if (this.isNew) {
+              throw new Error("this schema is for read-only");
+            }
+          });
+          return schema;
+        },
+      },
+      {
+        name: Todo.name,
+        useFactory: () => {
+          const schema = TodoSchema;
+          schema.pre("save", function () {
+            if (this.isNew) {
+              throw new Error("this schema is for read-only");
             }
           });
           return schema;

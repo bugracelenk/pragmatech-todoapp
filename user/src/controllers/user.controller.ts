@@ -1,10 +1,12 @@
 import { Controller, InternalServerErrorException, Inject, HttpStatus } from "@nestjs/common";
-import { ClientProxy, MessagePattern } from "@nestjs/microservices";
+import { ClientProxy, Ctx, MessagePattern, Payload, RmqContext } from "@nestjs/microservices";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "src/utilities/messages.data";
 import { UserChangePasswordDto } from "../dtos/user.changePassword.dto";
 import { UserUpdateDto } from "../dtos/user.update.dto";
 import { UserService } from "../services/user.service";
 import { Pattern } from "../pattern.enum";
+import { sendAck } from "src/helpers/sendAck";
+import { UserResponse } from "src/responses/user.response";
 
 @Controller("user")
 export class UserController {
@@ -15,86 +17,169 @@ export class UserController {
     @Inject("TEAM_SERVICE") private readonly teamServiceClient: ClientProxy
   ) {}
 
-  @MessagePattern(Pattern.UPDATE)
-  async updateUser(updateArgs: UserUpdateDto): Promise<{ message: string; id: string } | { error: string }> {
-    const updatedUser = await this.userService.updateUser(updateArgs);
-    if (!updatedUser) {
-      return { error: ERROR_MESSAGES.UPDATE_USER_ERROR };
-    }
+  @MessagePattern(Pattern.GET_USER)
+  async getUser(@Payload() args: { id: string }, @Ctx() context: RmqContext): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
 
-    return { message: SUCCESS_MESSAGES.UPDATE_SUCCESSFUL, id: updatedUser.id };
+      const user = await this.userService.getUserById(args.id);
+      if (!user) {
+        data = {
+          error: "USER_NOT_FOUND",
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+
+      data = {
+        user,
+        status: HttpStatus.ACCEPTED,
+      };
+
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
+    }
+  }
+
+  @MessagePattern(Pattern.UPDATE)
+  async updateUser(@Payload() updateArgs: UserUpdateDto, @Ctx() context: RmqContext): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const updatedUser = await this.userService.updateUser(updateArgs);
+      if (!updatedUser) {
+        data = { error: ERROR_MESSAGES.UPDATE_USER_ERROR, status: HttpStatus.INTERNAL_SERVER_ERROR };
+      }
+
+      data = { message: SUCCESS_MESSAGES.UPDATE_SUCCESSFUL, id: updatedUser.id, status: HttpStatus.ACCEPTED };
+
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
+    }
   }
 
   @MessagePattern(Pattern.CHANGE_PASSWORD_REQUEST)
-  async changePasswordRequest(data: { email: string }): Promise<{ token: string } | { error: string }> {
-    const { resetPasswordToken, status, user } = await this.userService.changePasswordRequest(data.email);
-    if (!status) {
-      return { error: ERROR_MESSAGES.CHANGE_PASSWORD_REQUEST_ERROR };
+  async changePasswordRequest(@Payload() args: { email: string }, @Ctx() context: RmqContext): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const { resetPasswordToken, status, user } = await this.userService.changePasswordRequest(args.email);
+      if (!status) {
+        data = { error: ERROR_MESSAGES.CHANGE_PASSWORD_REQUEST_ERROR, status: HttpStatus.INTERNAL_SERVER_ERROR };
+      }
+
+      delete user.password;
+
+      await this.mailerServiceClient.send("FORGOT_PASSWORD", {
+        user: {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+        url: "empty",
+        token: resetPasswordToken,
+        mailType: "FORGOT_PASSWORD",
+      });
+
+      data = { token: resetPasswordToken, status: HttpStatus.ACCEPTED };
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    delete user.password;
-
-    await this.mailerServiceClient.send("FORGOT_PASSWORD", {
-      user: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
-      url: "empty",
-      token: resetPasswordToken,
-      mailType: "FORGOT_PASSWORD",
-    });
-
-    return { token: resetPasswordToken };
   }
 
   @MessagePattern(Pattern.CHANGE_PASSWORD)
-  async changePassword(changePasswordArgs: UserChangePasswordDto): Promise<{ message: string } | { error: string }> {
-    const updatedUser = await this.userService.changePassword(changePasswordArgs);
+  async changePassword(
+    @Payload() changePasswordArgs: UserChangePasswordDto,
+    @Ctx() context: RmqContext
+  ): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const updatedUser = await this.userService.changePassword(changePasswordArgs);
 
-    if (!updatedUser) {
-      return { error: ERROR_MESSAGES.CHANGE_PASSWORD_ERROR };
+      if (!updatedUser) {
+        data = { error: ERROR_MESSAGES.CHANGE_PASSWORD_ERROR, status: HttpStatus.INTERNAL_SERVER_ERROR };
+      }
+
+      data = { message: SUCCESS_MESSAGES.PASSWORD_CHANGED, status: HttpStatus.ACCEPTED };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    return { message: SUCCESS_MESSAGES.PASSWORD_CHANGED };
   }
 
   @MessagePattern(Pattern.BAN_USER)
-  async banUser(banUserDto: {
-    id: string;
-    banReason: string;
-  }): Promise<{ message: string; id: string; banReason: string } | { error: string }> {
-    const bannedUser = await this.userService.banUserById(banUserDto);
+  async banUser(
+    @Payload() banUserDto: { id: string; banReason: string },
+    @Ctx() context: RmqContext
+  ): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const bannedUser = await this.userService.banUserById(banUserDto);
 
-    if (!bannedUser) {
-      return { error: ERROR_MESSAGES.BAN_USER_ERROR };
+      if (!bannedUser) {
+        data = { error: ERROR_MESSAGES.BAN_USER_ERROR, status: HttpStatus.INTERNAL_SERVER_ERROR };
+      }
+
+      data = {
+        message: SUCCESS_MESSAGES.USER_BANNED,
+        id: banUserDto.id,
+        banReason: banUserDto.banReason,
+        status: HttpStatus.ACCEPTED,
+      };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    return { message: SUCCESS_MESSAGES.USER_BANNED, id: banUserDto.id, banReason: banUserDto.banReason };
   }
 
   @MessagePattern(Pattern.GRANT_ADMIN)
-  async grantAdminRole(grantAdminRoleDto: {
-    id: string;
-  }): Promise<{ message: string; id: string } | { error: string }> {
-    const grantedUser = await this.userService.grantAdminRole(grantAdminRoleDto.id);
+  async grantAdminRole(
+    @Payload() grantAdminRoleDto: { id: string },
+    @Ctx() context: RmqContext
+  ): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const grantedUser = await this.userService.grantAdminRole(grantAdminRoleDto.id);
 
-    if (!grantedUser) {
-      return { error: ERROR_MESSAGES.GRANT_ADMIN_ERROR };
+      if (!grantedUser) {
+        data = { error: ERROR_MESSAGES.GRANT_ADMIN_ERROR, status: HttpStatus.INTERNAL_SERVER_ERROR };
+      }
+
+      data = { message: SUCCESS_MESSAGES.GRANT_ADMIN, id: grantAdminRoleDto.id, status: HttpStatus.ACCEPTED };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    return { message: SUCCESS_MESSAGES.GRANT_ADMIN, id: grantAdminRoleDto.id };
   }
 
   @MessagePattern(Pattern.TAKE_ADMIN)
-  async takeAdminRole(takeAdminRoleDto: { id: string }): Promise<{ message: string; id: string } | { error: string }> {
-    const takenUser = await this.userService.takeAdminRole(takeAdminRoleDto.id);
+  async takeAdminRole(@Payload() takeAdminRoleDto: { id: string }, @Ctx() context: RmqContext): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const takenUser = await this.userService.takeAdminRole(takeAdminRoleDto.id);
 
-    if (!takenUser) {
-      return { error: ERROR_MESSAGES.TAKE_ADMIN_ERROR };
+      if (!takenUser) {
+        data = { error: ERROR_MESSAGES.TAKE_ADMIN_ERROR, status: HttpStatus.INTERNAL_SERVER_ERROR };
+      }
+
+      data = { message: SUCCESS_MESSAGES.TAKE_ADMIN, id: takeAdminRoleDto.id, status: HttpStatus.ACCEPTED };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    return { message: SUCCESS_MESSAGES.TAKE_ADMIN, id: takeAdminRoleDto.id };
   }
 
   @MessagePattern(Pattern.GET_USER_BY_ID)
@@ -103,118 +188,155 @@ export class UserController {
   }
 
   @MessagePattern(Pattern.ADD_USER_TODO)
-  async addUsersTodo(addUsersTodoDto: {
-    userId: string;
-    todoId: string;
-  }): Promise<{ message?: string; status: number; error?: string }> {
-    const { userId, todoId } = addUsersTodoDto;
+  async addUsersTodo(
+    @Payload() addUsersTodoDto: { userId: string; todoId: string },
+    @Ctx() context: RmqContext
+  ): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const { userId, todoId } = addUsersTodoDto;
 
-    const todo = await this.todoServiceClient.send(Pattern.GET_TODO_BY_ID, { todoId });
-    if (!todo) {
-      return {
-        error: "TODO_NOT_FOUND",
-        status: HttpStatus.NOT_FOUND,
+      const todo = await this.todoServiceClient.send(Pattern.GET_TODO_BY_ID, { todoId });
+      if (!todo) {
+        data = {
+          error: "TODO_NOT_FOUND",
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+
+      const updatedUser = await this.userService.addUsersTodo(userId, todoId);
+      if (!updatedUser) {
+        data = {
+          error: `INTERNAL_SERVER_ERROR_${Pattern.ADD_USER_TODO}`,
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        };
+      }
+
+      data = {
+        message: `SUCCESS_${Pattern.ADD_USER_TODO}`,
+        status: HttpStatus.ACCEPTED,
       };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    const updatedUser = await this.userService.addUsersTodo(userId, todoId);
-    if (!updatedUser) {
-      return {
-        error: `INTERNAL_SERVER_ERROR_${Pattern.ADD_USER_TODO}`,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-
-    return {
-      message: `SUCCESS_${Pattern.ADD_USER_TODO}`,
-      status: HttpStatus.ACCEPTED,
-    };
   }
 
   @MessagePattern(Pattern.REMOVE_USER_TODO)
-  async removeUsersTodo(removeUsersTodoDto: {
-    userId: string;
-    todoId: string;
-  }): Promise<{ message?: string; status: number; error?: string }> {
-    const { userId, todoId } = removeUsersTodoDto;
+  async removeUsersTodo(
+    @Payload()
+    removeUsersTodoDto: {
+      userId: string;
+      todoId: string;
+    },
+    @Ctx() context: RmqContext
+  ): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const { userId, todoId } = removeUsersTodoDto;
 
-    const todo = await this.todoServiceClient.send(Pattern.GET_TODO_BY_ID, { todoId });
-    if (!todo) {
-      return {
-        error: "TODO_NOT_FOUND",
-        status: HttpStatus.NOT_FOUND,
+      const todo = await this.todoServiceClient.send(Pattern.GET_TODO_BY_ID, { todoId });
+      if (!todo) {
+        data = {
+          error: "TODO_NOT_FOUND",
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+
+      const updatedUser = await this.userService.removeUsersTodo(userId, todoId);
+      if (!updatedUser) {
+        data = {
+          error: `INTERNAL_SERVER_ERROR_${Pattern.REMOVE_USER_TODO}`,
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        };
+      }
+
+      data = {
+        message: `SUCCESS_${Pattern.REMOVE_USER_TODO}`,
+        status: HttpStatus.ACCEPTED,
       };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    const updatedUser = await this.userService.removeUsersTodo(userId, todoId);
-    if (!updatedUser) {
-      return {
-        error: `INTERNAL_SERVER_ERROR_${Pattern.REMOVE_USER_TODO}`,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-
-    return {
-      message: `SUCCESS_${Pattern.REMOVE_USER_TODO}`,
-      status: HttpStatus.ACCEPTED,
-    };
   }
 
   @MessagePattern(Pattern.ADD_USER_TEAM)
-  async addUsersTeam(addUsersTeamDto: {
-    userId: string;
-    teamId: string;
-  }): Promise<{ message?: string; status: number; error?: string }> {
-    const { userId, teamId } = addUsersTeamDto;
+  async addUsersTeam(
+    @Payload() addUsersTeamDto: { userId: string; teamId: string },
+    @Ctx() context: RmqContext
+  ): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const { userId, teamId } = addUsersTeamDto;
 
-    const team = await this.teamServiceClient.send(Pattern.GET_TODO_BY_ID, { teamId });
-    if (!team) {
-      return {
-        error: "TEAM_NOT_FOUND",
-        status: HttpStatus.NOT_FOUND,
+      const team = await this.teamServiceClient.send(Pattern.GET_TODO_BY_ID, { teamId });
+      if (!team) {
+        data = {
+          error: "TEAM_NOT_FOUND",
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+
+      const updatedUser = await this.userService.addUsersTeam(userId, teamId);
+      if (!updatedUser) {
+        data = {
+          error: `INTERNAL_SERVER_ERROR_${Pattern.ADD_USER_TEAM}`,
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        };
+      }
+
+      data = {
+        message: `SUCCESS_${Pattern.ADD_USER_TEAM}`,
+        status: HttpStatus.ACCEPTED,
       };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    const updatedUser = await this.userService.addUsersTeam(userId, teamId);
-    if (!updatedUser) {
-      return {
-        error: `INTERNAL_SERVER_ERROR_${Pattern.ADD_USER_TEAM}`,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-
-    return {
-      message: `SUCCESS_${Pattern.ADD_USER_TEAM}`,
-      status: HttpStatus.ACCEPTED,
-    };
   }
 
   @MessagePattern(Pattern.REMOVE_USER_TEAM)
-  async removeUsersTeam(removeUsersTeamDto: {
-    userId: string;
-    teamId: string;
-  }): Promise<{ message?: string; status: number; error?: string }> {
-    const { userId, teamId } = removeUsersTeamDto;
+  async removeUsersTeam(
+    @Payload() removeUsersTeamDto: { userId: string; teamId: string },
+    @Ctx() context: RmqContext
+  ): Promise<UserResponse> {
+    try {
+      let data: UserResponse;
+      const { userId, teamId } = removeUsersTeamDto;
 
-    const team = await this.teamServiceClient.send(Pattern.GET_TODO_BY_ID, { teamId });
-    if (!team) {
-      return {
-        error: "TEAM_NOT_FOUND",
-        status: HttpStatus.NOT_FOUND,
+      const team = await this.teamServiceClient.send(Pattern.GET_TODO_BY_ID, { teamId });
+      if (!team) {
+        data = {
+          error: "TEAM_NOT_FOUND",
+          status: HttpStatus.NOT_FOUND,
+        };
+      }
+
+      const updatedUser = await this.userService.removeUsersTeam(userId, teamId);
+      if (!updatedUser) {
+        data = {
+          error: `INTERNAL_SERVER_ERROR_${Pattern.REMOVE_USER_TEAM}`,
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        };
+      }
+
+      data = {
+        message: `SUCCESS_${Pattern.REMOVE_USER_TEAM}`,
+        status: HttpStatus.ACCEPTED,
       };
-    }
 
-    const updatedUser = await this.userService.removeUsersTeam(userId, teamId);
-    if (!updatedUser) {
-      return {
-        error: `INTERNAL_SERVER_ERROR_${Pattern.REMOVE_USER_TEAM}`,
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
+      sendAck(context);
+      return data;
+    } catch (error) {
+      sendAck(context);
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
     }
-
-    return {
-      message: `SUCCESS_${Pattern.REMOVE_USER_TEAM}`,
-      status: HttpStatus.ACCEPTED,
-    };
   }
 }
