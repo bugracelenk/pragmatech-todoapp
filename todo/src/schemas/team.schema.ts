@@ -14,6 +14,9 @@ export class Team {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   createdBy: string;
+
+  @Prop()
+  teamStatus: string;
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team);

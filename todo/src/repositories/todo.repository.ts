@@ -21,7 +21,7 @@ export class TodoRepository {
       .findById(todoId)
       .populate('createdBy', 'firstName lastName profileImage username id')
       .populate('assignedTo', 'firstName lastName profileImage username id')
-      .populate('team', '-__v')
+      .populate('team', 'name leader createdBy teamStatus id')
       .populate('team.leader', 'firstName lastName profileImage username id')
       .populate(
         'team.createdBy',
