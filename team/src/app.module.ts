@@ -6,6 +6,8 @@ import { TeamRepository } from './repositories/team.repository';
 import { TeamService } from './services/team.service';
 import { Team, TeamSchema } from './schemas/team.schema';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { User, UserSchema } from './schemas/user.schema';
+import { Todo, TodoSchema } from './schemas/todo.schema';
 
 @Module({
   imports: [
@@ -20,6 +22,30 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
             if (this.isNew) {
               const objId = this._id;
               this.id = objId;
+            }
+          });
+          return schema;
+        },
+      },
+      {
+        name: User.name,
+        useFactory: () => {
+          const schema = UserSchema;
+          schema.pre('save', function () {
+            if (this.isNew) {
+              throw new Error('this schema for read-only');
+            }
+          });
+          return schema;
+        },
+      },
+      {
+        name: Todo.name,
+        useFactory: () => {
+          const schema = TodoSchema;
+          schema.pre('save', function () {
+            if (this.isNew) {
+              throw new Error('this schema for read-only');
             }
           });
           return schema;

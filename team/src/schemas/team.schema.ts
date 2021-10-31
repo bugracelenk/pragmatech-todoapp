@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ITodo } from 'src/interfaces/todo.interface';
-import { IUser } from 'src/interfaces/user.interface';
 import * as mongoose from 'mongoose';
 import { TeamStatus } from './team.enum';
+import { Todo } from './todo.schema';
+import { User } from './user.schema';
 
 /**
  * Team Model:
@@ -31,31 +31,31 @@ export class Team {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'user',
+    ref: 'User',
   })
-  leader: IUser | string | mongoose.Schema.Types.ObjectId;
+  leader: User | string | mongoose.Schema.Types.ObjectId;
 
   @Prop({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: 'User',
   })
-  createdBy: IUser | string | mongoose.Schema.Types.ObjectId;
+  createdBy: User | string | mongoose.Schema.Types.ObjectId;
 
   @Prop({
     default: [],
   })
-  moderators: [IUser | string | mongoose.Schema.Types.ObjectId];
+  moderators: [User | string | mongoose.Schema.Types.ObjectId];
 
   @Prop({
     default: [],
   })
-  members: [IUser | string | mongoose.Schema.Types.ObjectId];
+  members: [User | string | mongoose.Schema.Types.ObjectId];
 
   @Prop({
     default: [],
   })
-  todos: [ITodo | string | mongoose.Schema.Types.ObjectId];
+  todos: [Todo | string | mongoose.Schema.Types.ObjectId];
 
   @Prop({
     default: 'ACTIVE',
