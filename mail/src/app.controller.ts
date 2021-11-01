@@ -10,11 +10,7 @@ export class MailController {
 
   @MessagePattern('SEND_MAIL')
   async sendMail(data: MailParamsDto): Promise<MailResponse> {
-    await this.mailService.sendMail(data);
-
-    return {
-      status: HttpStatus.ACCEPTED,
-      message: 'MAIL_SEND_SUCCESSFULLY',
-    };
+    console.log(data);
+    return await this.mailService.sendMail(data);
   }
 }

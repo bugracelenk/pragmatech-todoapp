@@ -73,7 +73,7 @@ export class UserController {
 
       delete user.password;
 
-      await this.mailerServiceClient.send("FORGOT_PASSWORD", {
+      const mailerRespone = await this.mailerServiceClient.send("SEND_MAIL", {
         user: {
           email: user.email,
           firstName: user.firstName,
@@ -185,7 +185,7 @@ export class UserController {
   @MessagePattern(Pattern.GET_USER_BY_ID)
   async getUserById(getUserDto: { id: string }) {
     const user = await this.userService.getUserById(getUserDto.id);
-    return { user }
+    return { user };
   }
 
   @MessagePattern(Pattern.ADD_USER_TODO)

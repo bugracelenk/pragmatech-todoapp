@@ -80,7 +80,7 @@ export class TodoController {
     };
   }
 
-  @Get('/:id')
+  @Get('/')
   @ApiOperation({
     summary: 'Gets todo with the given id',
   })
@@ -90,7 +90,7 @@ export class TodoController {
     type: TodoResponse,
   })
   @UsePipes(ValidationPipe)
-  async getTodoWithId(@Param('id') id: string) {
+  async getTodoWithId(@Query('id') id: string) {
     const getTodoResponse = await this.todoServiceClient.send<TodoResponse>(
       Pattern.TODO_GET_TODO_WITH_ID,
       {
@@ -130,7 +130,7 @@ export class TodoController {
     );
 
     const getTodoData = await lastValueFrom(getTodoResponse);
-
+    console.log(getTodoData);
     if (getTodoData.error || getTodoData.data === null) {
       throw new InternalServerErrorException(getTodoData.error);
     }

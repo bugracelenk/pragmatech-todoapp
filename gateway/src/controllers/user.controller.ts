@@ -138,6 +138,7 @@ export class UserController {
     return {
       status: HttpStatus.ACCEPTED,
       message: 'Email sent to user! 📨',
+      token: forgotPasswordData.token,
     };
   }
 

@@ -163,10 +163,12 @@ export class TodoService {
           {
             todoId: todo.id,
             teamId: todo.team,
+            operatingUserId: userId,
           },
         );
 
       const deleteTeamTodoData = await lastValueFrom(deleteTeamTodoResponse);
+
       if (deleteTeamTodoData.error) {
         return {
           error: deleteTeamTodoData.error,

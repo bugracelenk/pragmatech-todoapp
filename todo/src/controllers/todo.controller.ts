@@ -269,6 +269,8 @@ export class TodoController {
         data: null,
         status: HttpStatus.ACCEPTED,
       };
+
+      console.log(data);
       sendAck(context);
       return data;
     } catch (error) {

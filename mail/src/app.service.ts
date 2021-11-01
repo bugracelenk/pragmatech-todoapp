@@ -11,7 +11,13 @@ export class MailService {
   async sendMail(data: MailParamsDto) {
     try {
       const context = returnContext(data);
-      await this.mailerService.sendMail({
+      console.log({
+        to: data.user.email,
+        subject: Subject[data.mailType],
+        template: Template[data.mailType],
+        context,
+      });
+      return await this.mailerService.sendMail({
         to: data.user.email,
         subject: Subject[data.mailType],
         template: Template[data.mailType],

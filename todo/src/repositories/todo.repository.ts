@@ -21,12 +21,10 @@ export class TodoRepository {
       .findById(todoId)
       .populate('createdBy', 'firstName lastName profileImage username id')
       .populate('assignedTo', 'firstName lastName profileImage username id')
-      .populate('team', 'name leader createdBy teamStatus id')
+      .populate('team', 'name leader createdBy teamStatus id members')
       .populate('team.leader', 'firstName lastName profileImage username id')
-      .populate(
-        'team.createdBy',
-        'firstName lastName profileImage username id',
-      );
+      .populate('team.createdBy', 'firstName lastName profileImage username id')
+      .populate('team.members', 'firstName lastName profileImage username id');
   }
 
   async getTodosByUser(
