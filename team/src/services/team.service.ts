@@ -46,6 +46,8 @@ export class TeamService {
     ) {
       return false;
     }
+
+    return true;
   }
 
   async createTeam(createArgs: TeamCreateDto): Promise<Team> {

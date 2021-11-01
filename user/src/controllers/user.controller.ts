@@ -184,7 +184,8 @@ export class UserController {
 
   @MessagePattern(Pattern.GET_USER_BY_ID)
   async getUserById(getUserDto: { id: string }) {
-    return await this.userService.getUserById(getUserDto.id);
+    const user = await this.userService.getUserById(getUserDto.id);
+    return { user }
   }
 
   @MessagePattern(Pattern.ADD_USER_TODO)

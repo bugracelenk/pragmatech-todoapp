@@ -62,7 +62,7 @@ export class TodoService {
       ) {
         await this.todoRepository.deleteTodo(todo.id);
         return {
-          error: 'TEAM_TODO_ADD_ERROR',
+          error: teamData.error,
         };
       }
     }
