@@ -1,12 +1,12 @@
-pragmatech-todoapp
+# pragmatech-todoapp
 
 
-#to run on docker
+## To run on docker
 
 
-Execute ```
+Execute 
 
+```
 docker network create infrastructure && docker-compose up -d
-
 ```
 from the root of the repository
