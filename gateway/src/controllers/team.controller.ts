@@ -122,12 +122,15 @@ export class TeamController {
   async updateTeam(
     @Param() getId: GetIdDto,
     @Body() updateTeamDto: TeamUpdateTeamDto,
+    @Req() request: IUserFromRequest,
   ) {
+    const { user } = request;
     const response = await this.teamClientService.send<TeamResponse>(
       Pattern.UPDATE_TEAM,
       {
-        ...getId,
-        ...updateTeamDto,
+        teamId: getId.id,
+        userId: user.id,
+        updateArgs: updateTeamDto,
       },
     );
 
@@ -158,12 +161,15 @@ export class TeamController {
   async addMemberToTeam(
     @Param() getId: GetIdDto,
     @Body() getUserIdDto: GetIdDto,
+    @Req() request: IUserFromRequest,
   ) {
+    const { user } = request;
     const response = await this.teamClientService.send<TeamResponse>(
       Pattern.ADD_MEMBER,
       {
         teamId: getId.id,
         userId: getUserIdDto.id,
+        operatingUserId: user.id,
       },
     );
 
@@ -191,15 +197,18 @@ export class TeamController {
   @UserStatuses(UserStatus.ACTIVE)
   @UseGuards(JwtGuard, ActiveStatusGuard)
   @UsePipes(ValidationPipe)
-  async removeMemberToTeam(
+  async removeMemberFromTeam(
     @Param() getId: GetIdDto,
     @Body() getUserIdDto: GetIdDto,
+    @Req() request: IUserFromRequest,
   ) {
+    const { user } = request;
     const response = await this.teamClientService.send<TeamResponse>(
       Pattern.REMOVE_MEMBER,
       {
         teamId: getId.id,
         userId: getUserIdDto.id,
+        operatingUserId: user.id,
       },
     );
 
@@ -231,12 +240,15 @@ export class TeamController {
   async addModeratorToTeam(
     @Param() getId: GetIdDto,
     @Body() getUserIdDto: GetIdDto,
+    @Req() request: IUserFromRequest,
   ) {
+    const { user } = request;
     const response = await this.teamClientService.send<TeamResponse>(
       Pattern.ADD_MODERATOR,
       {
         teamId: getId.id,
         userId: getUserIdDto.id,
+        operatingUserId: user.id,
       },
     );
 
@@ -268,12 +280,15 @@ export class TeamController {
   async removeModeratorToTeam(
     @Param() getId: GetIdDto,
     @Body() getUserIdDto: GetIdDto,
+    @Req() request: IUserFromRequest,
   ) {
+    const { user } = request;
     const response = await this.teamClientService.send<TeamResponse>(
       Pattern.REMOVE_MODERATOR,
       {
         teamId: getId.id,
         userId: getUserIdDto.id,
+        operatingUserId: user.id,
       },
     );
 
