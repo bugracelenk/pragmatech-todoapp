@@ -1,4 +1,4 @@
-# pragmatech-todoapp
+#todoapp
 
 
 ## To run on docker
